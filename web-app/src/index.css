@@ -3,13 +3,13 @@
   line-height: 1.5;
   font-weight: 400;
 
-  --primary-color: #00cc66;
-  --primary-color-light: #00ff80;
-  --primary-color-dark: #009944;
+  --primary-color: #4a9d6e;
+  --primary-color-light: #6bb88a;
+  --primary-color-dark: #2d7a4a;
   --bg-color: #0c0c0c;
   --bg-color-secondary: #1a1a1a;
-  --text-color: #00cc66;
-  --border-color: #00cc66;
+  --text-color: #4a9d6e;
+  --border-color: #4a9d6e;
 
   color-scheme: dark;
   color: var(--text-color);
@@ -43,7 +43,7 @@ body {
 
 h1, h2, h3 {
   color: var(--primary-color);
-  text-shadow: 0 0 5px rgba(0, 204, 102, 0.3);
+  text-shadow: 0 0 5px rgba(74, 157, 110, 0.3);
 }
 
 [data-theme="light"] h1,
@@ -110,20 +110,20 @@ th, td {
 }
 
 th {
-  background-color: rgba(0, 204, 102, 0.2);
+  background-color: rgba(74, 157, 110, 0.2);
   color: var(--primary-color);
 }
 
 [data-theme="light"] th {
-  background-color: rgba(0, 136, 68, 0.1);
+  background-color: rgba(45, 122, 74, 0.1);
 }
 
 tr:hover {
-  background-color: rgba(0, 204, 102, 0.1);
+  background-color: rgba(74, 157, 110, 0.1);
 }
 
 [data-theme="light"] tr:hover {
-  background-color: rgba(0, 136, 68, 0.05);
+  background-color: rgba(45, 122, 74, 0.05);
 }
 
 input[type="file"] {
@@ -140,8 +140,8 @@ input[type="file"] {
 }
 
 .file-label:hover {
-  background-color: rgba(0, 204, 102, 0.1);
-  box-shadow: 0 0 15px rgba(0, 204, 102, 0.3);
+  background-color: rgba(74, 157, 110, 0.1);
+  box-shadow: 0 0 15px rgba(74, 157, 110, 0.3);
 }
 
 .warning {

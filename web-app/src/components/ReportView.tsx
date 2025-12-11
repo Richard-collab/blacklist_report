@@ -22,7 +22,6 @@ import {
   getUniqueAccounts,
   formatNumber,
   formatPercent,
-  hasMultipleNumericGroups,
 } from '../utils/dataProcessor';
 import { ProvinceMapChart } from './ProvinceMapChart';
 
@@ -45,20 +44,13 @@ export function ReportView({ data, onBack, theme }: ReportViewProps) {
   const accountProvinceStats = useMemo(() => calculateAccountProvinceStats(data, selectedAccount || undefined), [data, selectedAccount]);
   const uniqueGroups = useMemo(() => getUniqueGroups(data), [data]);
   const uniqueAccounts = useMemo(() => getUniqueAccounts(data), [data]);
-  const hasMultipleGroups = useMemo(() => hasMultipleNumericGroups(data), [data]);
 
   // Theme-aware colors
-  const primaryColor = theme === 'dark' ? '#00cc66' : '#008844';
+  const primaryColor = theme === 'dark' ? '#4a9d6e' : '#2d7a4a';
 
   const renderOverallTab = () => (
     <div className="section">
       <h2>{'>'} 黑名单大盘触发</h2>
-      
-      {hasMultipleGroups && (
-        <div className="warning">
-          ⚠️ 警告: 当前数据中包含多个数字group，这可能意味着数据来自不同的黑名单规则。
-        </div>
-      )}
       
       <div className="stats-grid">
         <div className="stat-card">
@@ -135,7 +127,7 @@ export function ReportView({ data, onBack, theme }: ReportViewProps) {
 
   const renderProvinceTab = () => (
     <div className="section">
-      <h2>{'>'} 黑名单分Group分省份触发</h2>
+      <h2>{'>'} 黑名单分省份触发</h2>
       
       <div className="filter-bar">
         <label>
@@ -354,7 +346,7 @@ export function ReportView({ data, onBack, theme }: ReportViewProps) {
           className={`tab ${activeTab === 'province' ? 'active' : ''}`}
           onClick={() => setActiveTab('province')}
         >
-          分Group分省份
+          分省份统计
         </button>
         <button 
           className={`tab ${activeTab === 'account' ? 'active' : ''}`}

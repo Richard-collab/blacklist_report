@@ -9,7 +9,7 @@
   border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 2em;
-  box-shadow: 0 0 20px rgba(0, 204, 102, 0.1);
+  box-shadow: 0 0 20px rgba(74, 157, 110, 0.1);
   transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
@@ -45,12 +45,12 @@
 }
 
 .upload-area:hover {
-  background-color: rgba(0, 204, 102, 0.05);
-  box-shadow: 0 0 30px rgba(0, 204, 102, 0.15);
+  background-color: rgba(74, 157, 110, 0.05);
+  box-shadow: 0 0 30px rgba(74, 157, 110, 0.15);
 }
 
 .upload-area.drag-over {
-  background-color: rgba(0, 204, 102, 0.1);
+  background-color: rgba(74, 157, 110, 0.1);
   border-color: var(--primary-color-light);
 }
 
@@ -67,16 +67,17 @@
 }
 
 .stat-card {
-  background-color: rgba(0, 204, 102, 0.05);
+  background-color: rgba(74, 157, 110, 0.05);
   border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 1em;
   text-align: center;
   transition: background-color 0.3s ease;
+  min-width: 0;
 }
 
 [data-theme="light"] .stat-card {
-  background-color: rgba(0, 136, 68, 0.05);
+  background-color: rgba(45, 122, 74, 0.05);
 }
 
 .stat-card h3 {
@@ -86,12 +87,13 @@
 }
 
 .stat-card .value {
-  font-size: 1.4em;
+  font-size: 1.2em;
   font-weight: bold;
   color: var(--primary-color);
-  text-shadow: 0 0 10px rgba(0, 204, 102, 0.3);
-  word-break: break-all;
-  overflow-wrap: break-word;
+  text-shadow: 0 0 10px rgba(74, 157, 110, 0.3);
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  hyphens: auto;
 }
 
 [data-theme="light"] .stat-card .value {
@@ -108,7 +110,7 @@
 }
 
 .chart-container {
-  background-color: rgba(0, 204, 102, 0.02);
+  background-color: rgba(74, 157, 110, 0.02);
   border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 1em;
@@ -117,7 +119,7 @@
 }
 
 [data-theme="light"] .chart-container {
-  background-color: rgba(0, 136, 68, 0.02);
+  background-color: rgba(45, 122, 74, 0.02);
 }
 
 .tabs {
@@ -145,11 +147,11 @@
 }
 
 .tab:hover:not(.active) {
-  background-color: rgba(0, 204, 102, 0.2);
+  background-color: rgba(74, 157, 110, 0.2);
 }
 
 [data-theme="light"] .tab:hover:not(.active) {
-  background-color: rgba(0, 136, 68, 0.1);
+  background-color: rgba(45, 122, 74, 0.1);
 }
 
 .table-container {
@@ -189,12 +191,12 @@
   flex-wrap: wrap;
   margin-bottom: 1em;
   padding: 1em;
-  background-color: rgba(0, 204, 102, 0.05);
+  background-color: rgba(74, 157, 110, 0.05);
   border-radius: 4px;
 }
 
 [data-theme="light"] .filter-bar {
-  background-color: rgba(0, 136, 68, 0.05);
+  background-color: rgba(45, 122, 74, 0.05);
 }
 
 .filter-bar select {
