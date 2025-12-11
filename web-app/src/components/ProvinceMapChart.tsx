@@ -149,9 +149,12 @@ export function ProvinceMapChart({ data, theme }: ProvinceMapChartProps) {
           color: textColor,
         },
         formatter: (params: unknown) => {
-          const paramArr = params as { name: string; value: number; dataIndex: number }[];
-          if (!paramArr || paramArr.length === 0) return '';
-          const item = chartData.barData[paramArr[0].dataIndex];
+          if (!params) return '';
+          const paramArr = Array.isArray(params) ? params : [params];
+          if (paramArr.length === 0) return '';
+          const first = paramArr[0] as { dataIndex?: number };
+          if (first.dataIndex === undefined) return '';
+          const item = chartData.barData[first.dataIndex];
           if (!item) return '';
           return `
             <div style="font-family: Consolas, Monaco, monospace;">
@@ -274,11 +277,30 @@ export function ProvinceMapChart({ data, theme }: ProvinceMapChartProps) {
             color: textColor,
           },
           formatter: (params: unknown) => {
-            const param = params as { name: string; value?: number; data?: { blackValue: number; blackRate: number; originalName: string } };
-            const originalName = param.data?.originalName || reverseProvinceNameMap[param.name] || param.name;
-            const value = param.value || 0;
-            const blackValue = param.data?.blackValue || 0;
-            const blackRate = param.data?.blackRate || 0;
+            const param = params as { 
+              name: string; 
+              value?: number; 
+              data?: { 
+                value: number;
+                blackValue: number; 
+                blackRate: number; 
+                originalName: string;
+              };
+            };
+            if (!param || !param.data) {
+              // Province without data
+              const provinceName = reverseProvinceNameMap[param?.name || ''] || param?.name || '未知';
+              return `
+                <div style="font-family: Consolas, Monaco, monospace;">
+                  <strong>${provinceName}</strong><br/>
+                  无数据
+                </div>
+              `;
+            }
+            const originalName = param.data.originalName || reverseProvinceNameMap[param.name] || param.name;
+            const value = param.data.value || 0;
+            const blackValue = param.data.blackValue || 0;
+            const blackRate = param.data.blackRate || 0;
             return `
               <div style="font-family: Consolas, Monaco, monospace;">
                 <strong>${originalName}</strong><br/>

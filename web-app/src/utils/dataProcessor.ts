@@ -2,7 +2,6 @@ import Papa from 'papaparse';
 import type { 
   BlacklistRecord, 
   OverallStats, 
-  GroupStats, 
   ProvinceStats,
   AccountStats,
   AccountProvinceStats
@@ -73,45 +72,6 @@ export function calculateOverallStats(records: BlacklistRecord[]): OverallStats 
     blackPickupRate: totalPickup > 0 ? (blackPickup / totalPickup) * 100 : 0,
     blackPayRate: totalPay > 0 ? (blackPay / totalPay) * 100 : 0,
   };
-}
-
-export function calculateGroupStats(records: BlacklistRecord[]): GroupStats[] {
-  const groupMap = new Map<string, {
-    totalOutbound: number;
-    blackOutbound: number;
-    totalPickup: number;
-    blackPickup: number;
-    totalPay: number;
-    blackPay: number;
-  }>();
-
-  records.forEach((record) => {
-    const group = record.group;
-    const existing = groupMap.get(group) || {
-      totalOutbound: 0,
-      blackOutbound: 0,
-      totalPickup: 0,
-      blackPickup: 0,
-      totalPay: 0,
-      blackPay: 0,
-    };
-
-    groupMap.set(group, {
-      totalOutbound: existing.totalOutbound + record.total_outbound_count,
-      blackOutbound: existing.blackOutbound + record.black_outbound_count,
-      totalPickup: existing.totalPickup + record.total_pickup_count,
-      blackPickup: existing.blackPickup + record.black_pickup_count,
-      totalPay: existing.totalPay + record.total_pay_count,
-      blackPay: existing.blackPay + record.black_pay_count,
-    });
-  });
-
-  return Array.from(groupMap.entries()).map(([group, stats]) => ({
-    group,
-    ...stats,
-    blackOutboundRate: stats.totalOutbound > 0 ? (stats.blackOutbound / stats.totalOutbound) * 100 : 0,
-    blackPickupRate: stats.totalPickup > 0 ? (stats.blackPickup / stats.totalPickup) * 100 : 0,
-  }));
 }
 
 export function calculateProvinceStats(records: BlacklistRecord[], group?: string): ProvinceStats[] {
@@ -226,16 +186,6 @@ export function formatNumber(num: number): string {
 
 export function formatPercent(num: number): string {
   return num.toFixed(2) + '%';
-}
-
-export function hasMultipleNumericGroups(records: BlacklistRecord[]): boolean {
-  const numericGroups = new Set<string>();
-  records.forEach(r => {
-    if (/^\d+$/.test(r.group)) {
-      numericGroups.add(r.group);
-    }
-  });
-  return numericGroups.size > 1;
 }
 
 export function calculateAccountProvinceStats(records: BlacklistRecord[], account?: string): AccountProvinceStats[] {
