@@ -58,3 +58,16 @@ export interface AccountStats {
   blackOutboundRate: number;
   blackPickupRate: number;
 }
+
+export interface AccountProvinceStats {
+  account: string;
+  province: string;
+  totalOutbound: number;
+  blackOutbound: number;
+  totalPickup: number;
+  blackPickup: number;
+  totalPay: number;
+  blackPay: number;
+  blackOutboundRate: number;
+  blackPickupRate: number;
+}

@@ -15,10 +15,11 @@ import {
 import type { BlacklistRecord } from '../types';
 import {
   calculateOverallStats,
-  calculateGroupStats,
   calculateProvinceStats,
   calculateAccountStats,
+  calculateAccountProvinceStats,
   getUniqueGroups,
+  getUniqueAccounts,
   formatNumber,
   formatPercent,
   hasMultipleNumericGroups,
@@ -28,20 +29,26 @@ import { ProvinceMapChart } from './ProvinceMapChart';
 interface ReportViewProps {
   data: BlacklistRecord[];
   onBack: () => void;
+  theme: 'dark' | 'light';
 }
 
-type TabType = 'overall' | 'group' | 'province' | 'account';
+type TabType = 'overall' | 'province' | 'account' | 'accountProvince';
 
-export function ReportView({ data, onBack }: ReportViewProps) {
+export function ReportView({ data, onBack, theme }: ReportViewProps) {
   const [activeTab, setActiveTab] = useState<TabType>('overall');
   const [selectedGroup, setSelectedGroup] = useState<string>('');
+  const [selectedAccount, setSelectedAccount] = useState<string>('');
 
   const overallStats = useMemo(() => calculateOverallStats(data), [data]);
-  const groupStats = useMemo(() => calculateGroupStats(data), [data]);
   const provinceStats = useMemo(() => calculateProvinceStats(data, selectedGroup || undefined), [data, selectedGroup]);
   const accountStats = useMemo(() => calculateAccountStats(data), [data]);
+  const accountProvinceStats = useMemo(() => calculateAccountProvinceStats(data, selectedAccount || undefined), [data, selectedAccount]);
   const uniqueGroups = useMemo(() => getUniqueGroups(data), [data]);
+  const uniqueAccounts = useMemo(() => getUniqueAccounts(data), [data]);
   const hasMultipleGroups = useMemo(() => hasMultipleNumericGroups(data), [data]);
+
+  // Theme-aware colors
+  const primaryColor = theme === 'dark' ? '#00cc66' : '#008844';
 
   const renderOverallTab = () => (
     <div className="section">
@@ -108,69 +115,20 @@ export function ReportView({ data, onBack }: ReportViewProps) {
               dataKey="value"
               label={({ name, percent }) => `${name}: ${((percent ?? 0) * 100).toFixed(1)}%`}
             >
-              <Cell fill="#33ff33" />
+              <Cell fill={primaryColor} />
               <Cell fill="#ff6666" />
             </Pie>
             <Tooltip 
-              contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #33ff33', color: '#33ff33' }}
+              contentStyle={{ 
+                backgroundColor: theme === 'dark' ? '#1a1a1a' : '#ffffff', 
+                border: `1px solid ${primaryColor}`, 
+                color: primaryColor 
+              }}
               formatter={(value: number) => formatNumber(value)}
             />
             <Legend />
           </PieChart>
         </ResponsiveContainer>
-      </div>
-    </div>
-  );
-
-  const renderGroupTab = () => (
-    <div className="section">
-      <h2>{'>'} 黑名单分Group触发</h2>
-      
-      <div className="chart-container">
-        <h3>各Group外呼量对比</h3>
-        <ResponsiveContainer width="100%" height={400}>
-          <BarChart data={groupStats} layout="vertical">
-            <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-            <XAxis type="number" stroke="#33ff33" />
-            <YAxis type="category" dataKey="group" stroke="#33ff33" width={150} />
-            <Tooltip 
-              contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #33ff33', color: '#33ff33' }}
-              formatter={(value: number) => formatNumber(value)}
-            />
-            <Legend />
-            <Bar dataKey="totalOutbound" name="总外呼量" fill="#33ff33" />
-            <Bar dataKey="blackOutbound" name="黑名单外呼量" fill="#ff6666" />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-
-      <div className="table-container scrollbar">
-        <table>
-          <thead>
-            <tr>
-              <th>Group</th>
-              <th>总外呼量</th>
-              <th>黑名单外呼量</th>
-              <th>黑名单外呼占比</th>
-              <th>总接听量</th>
-              <th>黑名单接听量</th>
-              <th>黑名单接听占比</th>
-            </tr>
-          </thead>
-          <tbody>
-            {groupStats.map((stat) => (
-              <tr key={stat.group}>
-                <td>{stat.group}</td>
-                <td>{formatNumber(stat.totalOutbound)}</td>
-                <td>{formatNumber(stat.blackOutbound)}</td>
-                <td>{formatPercent(stat.blackOutboundRate)}</td>
-                <td>{formatNumber(stat.totalPickup)}</td>
-                <td>{formatNumber(stat.blackPickup)}</td>
-                <td>{formatPercent(stat.blackPickupRate)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
       </div>
     </div>
   );
@@ -196,7 +154,7 @@ export function ReportView({ data, onBack }: ReportViewProps) {
       </div>
 
       <div className="chart-container">
-        <ProvinceMapChart data={provinceStats} />
+        <ProvinceMapChart data={provinceStats} theme={theme} />
       </div>
 
       <div className="table-container scrollbar">
@@ -238,15 +196,19 @@ export function ReportView({ data, onBack }: ReportViewProps) {
         <h3>各Account外呼量TOP15</h3>
         <ResponsiveContainer width="100%" height={500}>
           <BarChart data={accountStats.slice(0, 15)} layout="vertical">
-            <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-            <XAxis type="number" stroke="#33ff33" />
-            <YAxis type="category" dataKey="account" stroke="#33ff33" width={120} />
+            <CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? '#333' : '#ddd'} />
+            <XAxis type="number" stroke={primaryColor} />
+            <YAxis type="category" dataKey="account" stroke={primaryColor} width={120} />
             <Tooltip 
-              contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #33ff33', color: '#33ff33' }}
+              contentStyle={{ 
+                backgroundColor: theme === 'dark' ? '#1a1a1a' : '#ffffff', 
+                border: `1px solid ${primaryColor}`, 
+                color: primaryColor 
+              }}
               formatter={(value: number) => formatNumber(value)}
             />
             <Legend />
-            <Bar dataKey="totalOutbound" name="总外呼量" fill="#33ff33" />
+            <Bar dataKey="totalOutbound" name="总外呼量" fill={primaryColor} />
             <Bar dataKey="blackOutbound" name="黑名单外呼量" fill="#ff6666" />
           </BarChart>
         </ResponsiveContainer>
@@ -283,6 +245,94 @@ export function ReportView({ data, onBack }: ReportViewProps) {
     </div>
   );
 
+  const renderAccountProvinceTab = () => (
+    <div className="section">
+      <h2>{'>'} 分Account分省份统计</h2>
+
+      <div className="filter-bar">
+        <label>
+          选择Account:
+          <select 
+            value={selectedAccount} 
+            onChange={(e) => setSelectedAccount(e.target.value)}
+            style={{ marginLeft: '0.5em' }}
+          >
+            <option value="">全部</option>
+            {uniqueAccounts.map((account) => (
+              <option key={account} value={account}>{account}</option>
+            ))}
+          </select>
+        </label>
+      </div>
+
+      <div className="chart-container">
+        <h3>Account省份外呼量TOP20</h3>
+        <ResponsiveContainer width="100%" height={500}>
+          <BarChart data={accountProvinceStats.slice(0, 20)} layout="vertical">
+            <CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? '#333' : '#ddd'} />
+            <XAxis type="number" stroke={primaryColor} />
+            <YAxis 
+              type="category" 
+              dataKey={(d) => `${d.account}-${d.province}`} 
+              stroke={primaryColor} 
+              width={150}
+              tick={{ fontSize: 10 }}
+            />
+            <Tooltip 
+              contentStyle={{ 
+                backgroundColor: theme === 'dark' ? '#1a1a1a' : '#ffffff', 
+                border: `1px solid ${primaryColor}`, 
+                color: primaryColor 
+              }}
+              formatter={(value: number) => formatNumber(value)}
+              labelFormatter={(_, payload) => {
+                if (payload && payload.length > 0) {
+                  const data = payload[0].payload;
+                  return `${data.account} - ${data.province}`;
+                }
+                return '';
+              }}
+            />
+            <Legend />
+            <Bar dataKey="totalOutbound" name="总外呼量" fill={primaryColor} />
+            <Bar dataKey="blackOutbound" name="黑名单外呼量" fill="#ff6666" />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      <div className="table-container scrollbar">
+        <table>
+          <thead>
+            <tr>
+              <th>Account</th>
+              <th>省份</th>
+              <th>总外呼量</th>
+              <th>黑名单外呼量</th>
+              <th>黑名单外呼占比</th>
+              <th>总接听量</th>
+              <th>黑名单接听量</th>
+              <th>黑名单接听占比</th>
+            </tr>
+          </thead>
+          <tbody>
+            {accountProvinceStats.map((stat, index) => (
+              <tr key={`${stat.account}-${stat.province}-${index}`}>
+                <td>{stat.account}</td>
+                <td>{stat.province}</td>
+                <td>{formatNumber(stat.totalOutbound)}</td>
+                <td>{formatNumber(stat.blackOutbound)}</td>
+                <td>{formatPercent(stat.blackOutboundRate)}</td>
+                <td>{formatNumber(stat.totalPickup)}</td>
+                <td>{formatNumber(stat.blackPickup)}</td>
+                <td>{formatPercent(stat.blackPickupRate)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
   return (
     <div className="container">
       <button className="back-button" onClick={onBack}>
@@ -301,16 +351,10 @@ export function ReportView({ data, onBack }: ReportViewProps) {
           大盘触发
         </button>
         <button 
-          className={`tab ${activeTab === 'group' ? 'active' : ''}`}
-          onClick={() => setActiveTab('group')}
-        >
-          分Group触发
-        </button>
-        <button 
           className={`tab ${activeTab === 'province' ? 'active' : ''}`}
           onClick={() => setActiveTab('province')}
         >
-          分Group分省份触发
+          分Group分省份
         </button>
         <button 
           className={`tab ${activeTab === 'account' ? 'active' : ''}`}
@@ -318,12 +362,18 @@ export function ReportView({ data, onBack }: ReportViewProps) {
         >
           分Account统计
         </button>
+        <button 
+          className={`tab ${activeTab === 'accountProvince' ? 'active' : ''}`}
+          onClick={() => setActiveTab('accountProvince')}
+        >
+          分Account分省份
+        </button>
       </div>
 
       {activeTab === 'overall' && renderOverallTab()}
-      {activeTab === 'group' && renderGroupTab()}
       {activeTab === 'province' && renderProvinceTab()}
       {activeTab === 'account' && renderAccountTab()}
+      {activeTab === 'accountProvince' && renderAccountProvinceTab()}
     </div>
   );
 }

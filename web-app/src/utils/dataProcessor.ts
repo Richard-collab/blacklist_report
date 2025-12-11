@@ -4,7 +4,8 @@ import type {
   OverallStats, 
   GroupStats, 
   ProvinceStats,
-  AccountStats 
+  AccountStats,
+  AccountProvinceStats
 } from '../types';
 
 interface CSVRow {
@@ -235,4 +236,52 @@ export function hasMultipleNumericGroups(records: BlacklistRecord[]): boolean {
     }
   });
   return numericGroups.size > 1;
+}
+
+export function calculateAccountProvinceStats(records: BlacklistRecord[], account?: string): AccountProvinceStats[] {
+  const filteredRecords = account ? records.filter(r => r.account === account) : records;
+  
+  const accountProvinceMap = new Map<string, {
+    account: string;
+    province: string;
+    totalOutbound: number;
+    blackOutbound: number;
+    totalPickup: number;
+    blackPickup: number;
+    totalPay: number;
+    blackPay: number;
+  }>();
+
+  filteredRecords.forEach((record) => {
+    const key = `${record.account}|${record.province || '未知'}`;
+    const existing = accountProvinceMap.get(key) || {
+      account: record.account || '未知',
+      province: record.province || '未知',
+      totalOutbound: 0,
+      blackOutbound: 0,
+      totalPickup: 0,
+      blackPickup: 0,
+      totalPay: 0,
+      blackPay: 0,
+    };
+
+    accountProvinceMap.set(key, {
+      account: record.account || '未知',
+      province: record.province || '未知',
+      totalOutbound: existing.totalOutbound + record.total_outbound_count,
+      blackOutbound: existing.blackOutbound + record.black_outbound_count,
+      totalPickup: existing.totalPickup + record.total_pickup_count,
+      blackPickup: existing.blackPickup + record.black_pickup_count,
+      totalPay: existing.totalPay + record.total_pay_count,
+      blackPay: existing.blackPay + record.black_pay_count,
+    });
+  });
+
+  return Array.from(accountProvinceMap.values())
+    .map((stats) => ({
+      ...stats,
+      blackOutboundRate: stats.totalOutbound > 0 ? (stats.blackOutbound / stats.totalOutbound) * 100 : 0,
+      blackPickupRate: stats.totalPickup > 0 ? (stats.blackPickup / stats.totalPickup) * 100 : 0,
+    }))
+    .sort((a, b) => b.totalOutbound - a.totalOutbound);
 }
