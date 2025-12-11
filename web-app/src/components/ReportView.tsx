@@ -23,6 +23,7 @@ import {
   formatPercent,
   hasMultipleNumericGroups,
 } from '../utils/dataProcessor';
+import { ProvinceMapChart } from './ProvinceMapChart';
 
 interface ReportViewProps {
   data: BlacklistRecord[];
@@ -195,21 +196,7 @@ export function ReportView({ data, onBack }: ReportViewProps) {
       </div>
 
       <div className="chart-container">
-        <h3>各省份外呼量TOP20</h3>
-        <ResponsiveContainer width="100%" height={500}>
-          <BarChart data={provinceStats.slice(0, 20)} layout="vertical">
-            <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-            <XAxis type="number" stroke="#33ff33" />
-            <YAxis type="category" dataKey="province" stroke="#33ff33" width={80} />
-            <Tooltip 
-              contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #33ff33', color: '#33ff33' }}
-              formatter={(value: number) => formatNumber(value)}
-            />
-            <Legend />
-            <Bar dataKey="totalOutbound" name="总外呼量" fill="#33ff33" />
-            <Bar dataKey="blackOutbound" name="黑名单外呼量" fill="#ff6666" />
-          </BarChart>
-        </ResponsiveContainer>
+        <ProvinceMapChart data={provinceStats} />
       </div>
 
       <div className="table-container scrollbar">
