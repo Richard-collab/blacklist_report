@@ -1,4 +1,6 @@
+import { useRef } from 'react';
 import * as XLSX from 'xlsx';
+import html2canvas from 'html2canvas';
 import type { BatchFileResult } from '../types';
 import { formatNumber, formatPercent } from '../utils/dataProcessor';
 
@@ -8,7 +10,9 @@ interface BatchReportViewProps {
   theme: 'dark' | 'light';
 }
 
-export function BatchReportView({ data, onBack }: BatchReportViewProps) {
+export function BatchReportView({ data, onBack, theme }: BatchReportViewProps) {
+  const tableRef = useRef<HTMLDivElement>(null);
+
   const handleExport = () => {
     const exportData = data.map(item => ({
       '文件名': item.fileName,
@@ -30,6 +34,25 @@ export function BatchReportView({ data, onBack }: BatchReportViewProps) {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, '批量分析报告');
     XLSX.writeFile(wb, `批量分析报告_${new Date().toISOString().split('T')[0]}.xlsx`);
+  };
+
+  const handleExportImage = async () => {
+    if (!tableRef.current) return;
+
+    try {
+      const canvas = await html2canvas(tableRef.current, {
+        backgroundColor: theme === 'dark' ? '#1a1a1a' : '#ffffff',
+      });
+
+      const image = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.href = image;
+      link.download = `批量分析报告_${new Date().toISOString().split('T')[0]}.png`;
+      link.click();
+    } catch (error) {
+      console.error('Failed to export image:', error);
+      alert('导出图片失败');
+    }
   };
 
   const handleRowClick = (item: BatchFileResult) => {
@@ -60,13 +83,16 @@ export function BatchReportView({ data, onBack }: BatchReportViewProps) {
         <h1>批量分析报告<span className="terminal-cursor"></span></h1>
       </div>
 
-      <div className="actions-bar" style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1em' }}>
+      <div className="actions-bar" style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1em', gap: '10px' }}>
         <button onClick={handleExport} className="export-button">
           📥 导出 Excel
         </button>
+        <button onClick={handleExportImage} className="export-button">
+          📷 导出图片
+        </button>
       </div>
 
-      <div className="table-container-full">
+      <div className="table-container-full" ref={tableRef}>
         <table className="batch-table">
           <thead>
             <tr>
@@ -138,6 +164,8 @@ export function BatchReportView({ data, onBack }: BatchReportViewProps) {
         .table-container-full {
           width: 100%;
           overflow: visible;
+          padding: 10px; /* Add padding for image export look */
+          background-color: var(--bg-color-secondary); /* Ensure background is captured */
         }
         .table-container-full table {
           width: 100%;
