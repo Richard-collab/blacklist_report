@@ -66,7 +66,7 @@ export function BatchReportView({ data, onBack }: BatchReportViewProps) {
         </button>
       </div>
 
-      <div className="table-container scrollbar">
+      <div className="table-container-full">
         <table className="batch-table">
           <thead>
             <tr>
@@ -134,6 +134,14 @@ export function BatchReportView({ data, onBack }: BatchReportViewProps) {
         }
         [data-theme='light'] .warning-text {
           color: #d32f2f;
+        }
+        .table-container-full {
+          width: 100%;
+          overflow: visible;
+        }
+        .table-container-full table {
+          width: 100%;
+          border-collapse: collapse;
         }
       `}</style>
     </div>

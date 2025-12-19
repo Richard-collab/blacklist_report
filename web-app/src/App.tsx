@@ -46,6 +46,31 @@ function App() {
         }
       }
     }
+
+    // Cleanup old reports (optional strategy: clear all reportData keys not in use?)
+    // For now, let's just leave it or maybe clear very old ones if we tracked timestamps.
+    // Simpler: clear reportData keys that are older than 24h if we encoded timestamp in ID?
+    // ID format: ${Date.now()}_...
+
+    // Pruning strategy: Iterate localStorage and remove items older than 24h
+    try {
+      const now = Date.now();
+      const ONE_DAY = 24 * 60 * 60 * 1000;
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('reportData_')) {
+          const idPart = key.split('_')[1]; // reportId part
+          if (idPart) {
+            const timestamp = parseInt(idPart.split('_')[0] || '0'); // extract timestamp part of reportId
+            if (timestamp && (now - timestamp > ONE_DAY)) {
+              localStorage.removeItem(key);
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to cleanup old reports', e);
+    }
   }, []);
 
   const toggleTheme = () => {
