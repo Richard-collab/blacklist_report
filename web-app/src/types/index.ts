@@ -9,6 +9,9 @@ export interface BlacklistRecord {
   black_pickup_count: number;
   total_pay_count: number;
   black_pay_count: number;
+
+  total_complain_count: number;
+  black_complain_count: number;
 }
 
 export interface OverallStats {
@@ -21,6 +24,10 @@ export interface OverallStats {
   blackOutboundRate: number;
   blackPickupRate: number;
   blackPayRate: number;
+
+  totalComplain: number;
+  blackComplain: number;
+  blackComplainRate: number;
 }
 
 export interface GroupStats {

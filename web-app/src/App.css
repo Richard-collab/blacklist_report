@@ -101,11 +101,20 @@
 }
 
 .stat-card .value.warning {
-  color: #ff9900;
+  color: hsl(24, 100%, 50%);
+  text-shadow: 0 0 10px rgba(255, 153, 0, 0.3);
+}
+
+.stat-card .value.normal {
+  color: hwb(110 16% 31%);
   text-shadow: 0 0 10px rgba(255, 153, 0, 0.3);
 }
 
 [data-theme="light"] .stat-card .value.warning {
+  text-shadow: none;
+}
+
+[data-theme="light"] .stat-card .value.normal {
   text-shadow: none;
 }
 

@@ -45,17 +45,18 @@ export function ReportView({ data, onBack, theme }: ReportViewProps) {
   const uniqueGroups = useMemo(() => getUniqueGroups(data), [data]);
   const uniqueAccounts = useMemo(() => getUniqueAccounts(data), [data]);
 
-  // Theme-aware colors
+  // 根据主题切换颜色
   const primaryColor = theme === 'dark' ? '#4a9d6e' : '#2d7a4a';
 
   const renderOverallTab = () => (
     <div className="section">
       <h2>{'>'} 黑名单大盘触发</h2>
       
+      {/* 顶部统计卡片区域 */}
       <div className="stats-grid">
         <div className="stat-card">
           <h3>总外呼量</h3>
-          <div className="value">{formatNumber(overallStats.totalOutbound)}</div>
+          <div className="value normal">{formatNumber(overallStats.totalOutbound)}</div>
         </div>
         <div className="stat-card">
           <h3>黑名单外呼量</h3>
@@ -67,7 +68,7 @@ export function ReportView({ data, onBack, theme }: ReportViewProps) {
         </div>
         <div className="stat-card">
           <h3>总接听量</h3>
-          <div className="value">{formatNumber(overallStats.totalPickup)}</div>
+          <div className="value normal">{formatNumber(overallStats.totalPickup)}</div>
         </div>
         <div className="stat-card">
           <h3>黑名单接听量</h3>
@@ -79,7 +80,7 @@ export function ReportView({ data, onBack, theme }: ReportViewProps) {
         </div>
         <div className="stat-card">
           <h3>总支付量</h3>
-          <div className="value">{formatNumber(overallStats.totalPay)}</div>
+          <div className="value normal">{formatNumber(overallStats.totalPay)}</div>
         </div>
         <div className="stat-card">
           <h3>黑名单支付量</h3>
@@ -89,38 +90,91 @@ export function ReportView({ data, onBack, theme }: ReportViewProps) {
           <h3>黑名单支付占比</h3>
           <div className="value warning">{formatPercent(overallStats.blackPayRate)}</div>
         </div>
+        <div className="stat-card">
+          <h3>总投诉量</h3>
+          <div className="value normal">{formatNumber(overallStats.totalComplain)}</div>
+        </div>
+        <div className="stat-card">
+          <h3>黑名单投诉量</h3>
+          <div className="value warning">{formatNumber(overallStats.blackComplain)}</div>
+        </div>
+        <div className="stat-card">
+          <h3>黑名单投诉占比</h3>
+          <div className="value warning">{formatPercent(overallStats.blackComplainRate)}</div>
+        </div>
       </div>
 
-      <div className="chart-container">
-        <h3>外呼量分布</h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <PieChart>
-            <Pie
-              data={[
-                { name: '非黑名单外呼', value: overallStats.totalOutbound - overallStats.blackOutbound },
-                { name: '黑名单外呼', value: overallStats.blackOutbound },
-              ]}
-              cx="50%"
-              cy="50%"
-              innerRadius={60}
-              outerRadius={100}
-              dataKey="value"
-              label={({ name, percent }) => `${name}: ${((percent ?? 0) * 100).toFixed(1)}%`}
-            >
-              <Cell fill={primaryColor} />
-              <Cell fill="#ff6666" />
-            </Pie>
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: theme === 'dark' ? '#1a1a1a' : '#ffffff', 
-                border: `1px solid ${primaryColor}`, 
-                color: primaryColor 
-              }}
-              formatter={(value: number) => formatNumber(value)}
-            />
-            <Legend />
-          </PieChart>
-        </ResponsiveContainer>
+      {/* 布局容器：使用 CSS Grid 实现并列展示 
+         如果要拓展成 2行3列 (2*3)，只需将 gridTemplateColumns 改为 'repeat(3, 1fr)' 即可
+      */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginTop: '20px' }}>
+        
+        {/* 图表 1：外呼分布 */}
+        <div className="chart-container">
+          <h3>外呼量分布</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie
+                data={[
+                  { name: '非黑名单外呼', value: overallStats.totalOutbound - overallStats.blackOutbound },
+                  { name: '黑名单外呼', value: overallStats.blackOutbound },
+                ]}
+                cx="50%"
+                cy="50%"
+                innerRadius={60}
+                outerRadius={100}
+                dataKey="value"
+                label={({ name, percent }) => `${name}: ${((percent ?? 0) * 100).toFixed(1)}%`}
+              >
+                <Cell fill={primaryColor} />
+                <Cell fill="#ff6666" />
+              </Pie>
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: theme === 'dark' ? '#1a1a1a' : '#ffffff', 
+                  border: `1px solid ${primaryColor}`, 
+                  color: primaryColor 
+                }}
+                formatter={(value: number) => formatNumber(value)}
+              />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* 图表 2：投诉分布 */}
+        <div className="chart-container">
+          <h3>投诉量分布</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie
+                data={[
+                  { name: '非黑名单投诉', value: overallStats.totalComplain - overallStats.blackComplain },
+                  { name: '黑名单投诉', value: overallStats.blackComplain },
+                ]}
+                cx="50%"
+                cy="50%"
+                innerRadius={60}
+                outerRadius={100}
+                dataKey="value"
+                label={({ name, percent }) => `${name}: ${((percent ?? 0) * 100).toFixed(1)}%`}
+              >
+                <Cell fill={primaryColor} />
+                <Cell fill="#ff6666" />
+              </Pie>
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: theme === 'dark' ? '#1a1a1a' : '#ffffff', 
+                  border: `1px solid ${primaryColor}`, 
+                  color: primaryColor 
+                }}
+                formatter={(value: number) => formatNumber(value)}
+              />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+        
       </div>
     </div>
   );

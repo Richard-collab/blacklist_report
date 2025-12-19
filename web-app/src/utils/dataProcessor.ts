@@ -18,6 +18,9 @@ interface CSVRow {
   black_pickup_count: string;
   total_pay_count: string;
   black_pay_count: string;
+
+  total_complain_count: string;
+  black_complain_count: string;
 }
 
 export function parseCSVData(csvText: string): BlacklistRecord[] {
@@ -41,6 +44,9 @@ export function parseCSVData(csvText: string): BlacklistRecord[] {
     black_pickup_count: parseInt(row.black_pickup_count) || 0,
     total_pay_count: parseInt(row.total_pay_count) || 0,
     black_pay_count: parseInt(row.black_pay_count) || 0,
+
+    total_complain_count: parseInt(row.total_complain_count) || 0,
+    black_complain_count: parseInt(row.black_complain_count) || 0,
   }));
 }
 
@@ -51,6 +57,9 @@ export function calculateOverallStats(records: BlacklistRecord[]): OverallStats 
   let blackPickup = 0;
   let totalPay = 0;
   let blackPay = 0;
+  // 投诉数据
+  let totalComplain = 0;
+  let blackComplain = 0;
 
   records.forEach((record) => {
     totalOutbound += record.total_outbound_count;
@@ -59,6 +68,9 @@ export function calculateOverallStats(records: BlacklistRecord[]): OverallStats 
     blackPickup += record.black_pickup_count;
     totalPay += record.total_pay_count;
     blackPay += record.black_pay_count;
+
+    totalComplain += record.total_complain_count;
+    blackComplain += record.black_complain_count;
   });
 
   return {
@@ -68,9 +80,13 @@ export function calculateOverallStats(records: BlacklistRecord[]): OverallStats 
     blackPickup,
     totalPay,
     blackPay,
+    totalComplain,
+    blackComplain,
     blackOutboundRate: totalOutbound > 0 ? (blackOutbound / totalOutbound) * 100 : 0,
     blackPickupRate: totalPickup > 0 ? (blackPickup / totalPickup) * 100 : 0,
     blackPayRate: totalPay > 0 ? (blackPay / totalPay) * 100 : 0,
+
+    blackComplainRate: totalComplain > 0 ? (blackComplain / totalComplain) * 100 : 0,
   };
 }
 
