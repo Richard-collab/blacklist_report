@@ -30,6 +30,12 @@ export interface OverallStats {
   blackComplainRate: number;
 }
 
+export interface BatchFileResult {
+  fileName: string;
+  stats: OverallStats;
+  rawData: BlacklistRecord[];
+}
+
 export interface GroupStats {
   group: string;
   totalOutbound: number;

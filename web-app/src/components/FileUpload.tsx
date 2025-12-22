@@ -1,38 +1,72 @@
 import { useCallback, useState, useRef } from 'react';
 
-interface FileUploadProps {
-  onFileLoad: (content: string) => void;
+export interface UploadedFile {
+  name: string;
+  content: string;
 }
 
-export function FileUpload({ onFileLoad }: FileUploadProps) {
+interface FileUploadProps {
+  onUpload: (files: UploadedFile[], isBatch: boolean) => void;
+}
+
+export function FileUpload({ onUpload }: FileUploadProps) {
   const [dragOver, setDragOver] = useState(false);
-  const [fileName, setFileName] = useState<string | null>(null);
+  const [fileNames, setFileNames] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isBatch, setIsBatch] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFile = useCallback((file: File) => {
-    if (!file.name.endsWith('.csv')) {
+  const processFiles = useCallback(async (files: File[]) => {
+    if (files.length === 0) return;
+
+    if (!isBatch && files.length > 1) {
+      alert('单文件模式下只能上传一个文件，请切换到批量分析模式或只上传一个文件。');
+      return;
+    }
+
+    const validFiles = files.filter(f => f.name.endsWith('.csv'));
+    if (validFiles.length !== files.length) {
+      alert('部分文件不是 CSV 格式，已被忽略');
+    }
+
+    if (validFiles.length === 0) {
       alert('请上传 CSV 文件');
       return;
     }
 
-    setFileName(file.name);
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const content = e.target?.result as string;
-      onFileLoad(content);
-    };
-    reader.readAsText(file, 'UTF-8');
-  }, [onFileLoad]);
+    setLoading(true);
+    setFileNames(validFiles.map(f => f.name));
+
+    try {
+      const results: UploadedFile[] = await Promise.all(
+        validFiles.map(file => new Promise<UploadedFile>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            resolve({
+              name: file.name,
+              content: e.target?.result as string
+            });
+          };
+          reader.onerror = reject;
+          reader.readAsText(file, 'UTF-8');
+        }))
+      );
+
+      onUpload(results, isBatch);
+    } catch (error) {
+      console.error(error);
+      alert('读取文件时出错');
+    } finally {
+      setLoading(false);
+    }
+  }, [isBatch, onUpload]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setDragOver(false);
-    const file = e.dataTransfer.files[0];
-    if (file) {
-      handleFile(file);
-    }
-  }, [handleFile]);
+    const files = Array.from(e.dataTransfer.files);
+    processFiles(files);
+  }, [processFiles]);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -44,24 +78,24 @@ export function FileUpload({ onFileLoad }: FileUploadProps) {
   }, []);
 
   const handleFileInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      handleFile(file);
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      processFiles(files);
     }
-  }, [handleFile]);
+  }, [processFiles]);
 
   const loadSampleData = useCallback(async () => {
     setLoading(true);
     try {
       const response = await fetch('/sample-data.csv');
       const content = await response.text();
-      onFileLoad(content);
+      onUpload([{ name: 'sample-data.csv', content }], false);
     } catch {
       alert('无法加载示例数据');
     } finally {
       setLoading(false);
     }
-  }, [onFileLoad]);
+  }, [onUpload]);
 
   const handleSelectFile = useCallback(() => {
     fileInputRef.current?.click();
@@ -72,6 +106,27 @@ export function FileUpload({ onFileLoad }: FileUploadProps) {
       <div className="terminal-header">
         <h1>黑名单回测报告分析系统<span className="terminal-cursor"></span></h1>
       </div>
+
+      <div className="mode-switch" style={{ marginBottom: '1.5em', display: 'flex', justifyContent: 'center', gap: '1em' }}>
+        <button
+          className={`tab ${!isBatch ? 'active' : ''}`}
+          onClick={() => {
+            setIsBatch(false);
+            setFileNames([]);
+          }}
+        >
+          单文件分析
+        </button>
+        <button
+          className={`tab ${isBatch ? 'active' : ''}`}
+          onClick={() => {
+            setIsBatch(true);
+            setFileNames([]);
+          }}
+        >
+          批量分析
+        </button>
+      </div>
       
       <div 
         className={`upload-area ${dragOver ? 'drag-over' : ''}`}
@@ -80,27 +135,31 @@ export function FileUpload({ onFileLoad }: FileUploadProps) {
         onDragLeave={handleDragLeave}
       >
         <div className="upload-icon">📁</div>
-        <p>拖放 CSV 文件到此处</p>
+        <p>{isBatch ? '拖放多个 CSV 文件到此处' : '拖放 CSV 文件到此处'}</p>
         <p>或</p>
         <label>
           <input 
             ref={fileInputRef}
             type="file" 
             accept=".csv" 
+            multiple={isBatch}
             onChange={handleFileInput} 
           />
           <button type="button" onClick={handleSelectFile}>
-            选择文件
+            {isBatch ? '选择多个文件' : '选择文件'}
           </button>
         </label>
-        {fileName && (
-          <p style={{ marginTop: '1em', color: '#33ff33' }}>
-            已选择: {fileName}
-          </p>
+        {fileNames.length > 0 && (
+          <div style={{ marginTop: '1em', color: '#33ff33', textAlign: 'left', maxHeight: '100px', overflowY: 'auto' }}>
+            <p>已选择 ({fileNames.length}):</p>
+            <ul style={{ listStyle: 'none', padding: 0 }}>
+              {fileNames.map(name => <li key={name}>{name}</li>)}
+            </ul>
+          </div>
         )}
         <div style={{ marginTop: '1em' }}>
-          <button type="button" onClick={loadSampleData} disabled={loading}>
-            {loading ? '加载中...' : '加载示例数据'}
+          <button type="button" onClick={loadSampleData} disabled={loading || isBatch}>
+            {loading ? '加载中...' : '加载示例数据 (单文件)'}
           </button>
         </div>
       </div>
@@ -114,9 +173,9 @@ export function FileUpload({ onFileLoad }: FileUploadProps) {
           overflow: 'auto',
           fontSize: '0.85em'
         }}>
-{`dt,account,province,group,total_outbound_count,black_outbound_count,total_pickup_count,black_pickup_count,total_pay_count,black_pay_count
-2025-12-10,account1,广东,31,1000,100,500,50,10,1
-2025-12-10,account1,广东,未触发黑名单部分,2000,0,800,0,20,0`}
+{`dt,account,province,group,total_outbound_count,black_outbound_count,total_pickup_count,black_pickup_count,total_pay_count,black_pay_count,total_complain_count,black_complain_count
+2025-12-10,account1,广东,31,1000,100,500,50,10,1,5,1
+2025-12-10,account1,广东,未触发黑名单部分,2000,0,800,0,20,0,0,0`}
         </pre>
       </div>
     </div>

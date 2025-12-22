@@ -10,15 +10,19 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@types/xlsx": "^0.0.35",
     "echarts": "^6.0.0",
     "echarts-for-react": "^3.0.5",
+    "html2canvas": "^1.4.1",
     "papaparse": "^5.5.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "recharts": "^3.5.1"
+    "recharts": "^3.5.1",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
+    "@types/html2canvas": "^0.5.35",
     "@types/node": "^24.10.1",
     "@types/papaparse": "^5.5.1",
     "@types/react": "^19.2.5",
